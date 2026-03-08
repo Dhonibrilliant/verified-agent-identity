@@ -1,0 +1,48 @@
+name: Verify Human Identity
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent_name:
+        description: "Dhoni"
+        required: true
+        default: "Dhoni"
+      agent_description:
+        description: "Dhoni"
+        required: true
+        default: "Dhoni AI Agent"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Step 1 - Install ClawHub skill
+        run: npx clawhub@latest install verified-agent-identity
+
+      - name: Install script dependencies
+        run: |
+          if [ -d "scripts" ]; then
+            cd scripts
+            npm install || true
+          fi
+
+      - name: Step 2 - Create new Ethereum Identity
+        run: |
+          if [ -f "scripts/createNewEthereumIdentity.js" ]; then
+            node scripts/createNewEthereumIdentity.js
+          fi
+
+      - name: Step 3 - Link Human to Agent
+        run: |
+          if [ -f "scripts/manualLinkHumanToAgent.js" ]; then
+            node scripts/manualLinkHumanToAgent.js --challenge '{"name":"Dhoni","description":"Dhoni AI Agent"}'
+          fi
